@@ -7,7 +7,7 @@
 // Serial commands (115200 baud):
 //   d  dump the current screen as hex (tools/grab_screen.py turns it into a PNG)
 //   f  force a full refresh
-//   n  next sample flight (demo mode only)
+//   n  next sample flight (in live mode, shown until the next poll)
 
 #include <Arduino.h>
 #include <HTTPClient.h>
@@ -198,7 +198,8 @@ void loop() {
     int ch = Serial.read();
     if (ch == 'd') dumpScreen();
     if (ch == 'f') force = true;
-    if (ch == 'n' && demo) { nextSample(); lastPoll = millis(); force = true; }
+    // In live mode the sample stays up until the next poll replaces it.
+    if (ch == 'n') { nextSample(); if (demo) lastPoll = millis(); force = true; }
   }
 
   uint32_t now = millis();

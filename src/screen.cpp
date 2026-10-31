@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "generated/fonts_gen.h"
+#include "logo.h"
 
 static const int X0 = 292, XR = 776;   // right-hand column
 static const int LOGO_CX = 136;        // centre of the logo panel
@@ -140,8 +141,21 @@ static void statCell(Canvas &c, int x, int y, bool divider, const char *label, c
 void drawFlight(Canvas &c, const Flight &f, const char *caption) {
   c.clear();
 
-  // Left: logo panel. No logos yet (phase 3): a silhouette by aircraft class.
-  silhouette(c, f.shape[0] ? f.shape : "narrowbody", 36, 14);
+  // Left: the airline's logo if we have one (by airline, else by the callsign's
+  // operator prefix), otherwise a silhouette by aircraft class.
+  const Logo *logo = findLogo(f.airlineIcao);
+  if (!logo && strlen(f.callsign) > 3) {
+    char pre[4] = {f.callsign[0], f.callsign[1], f.callsign[2], 0};
+    if (f.callsign[3] >= '0' && f.callsign[3] <= '9') logo = findLogo(pre);
+  }
+  if (logo) {
+    int ox = LOGO_CX - logo->w / 2, oy = 14 + (200 - logo->h) / 2, stride = (logo->w + 7) / 8;
+    for (int y = 0; y < logo->h; y++)
+      for (int x = 0; x < logo->w; x++)
+        if (logo->bits[y * stride + (x >> 3)] & (0x80 >> (x & 7))) c.set(ox + x, oy + y);
+  } else {
+    silhouette(c, f.shape[0] ? f.shape : "narrowbody", 36, 14);
+  }
   int cw = Canvas::textWidth(caption, FONT_CAPTION, 2);
   c.text(LOGO_CX - cw / 2, 248, caption, FONT_CAPTION, 2);
   c.fillRect(272, 14, 2, 245);

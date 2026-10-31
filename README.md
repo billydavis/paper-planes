@@ -44,7 +44,17 @@ Setup:
 2. On the PC, start the server so the board can reach it:
    `cd ../flight-tracker` then `$env:FT_HOST="0.0.0.0"; python run.py` (PowerShell).
 3. Build and flash: `pio run -t upload`. The first build generates the fonts
-   (`tools/fontgen.py`, needs Python + Pillow and the Windows fonts).
+   (`tools/fontgen.py`, needs Python + Pillow and the Windows fonts) and the
+   airline logos (`tools/logogen.py`, see below).
+
+Logos: `tools/logogen.py` downloads each airline's logo once from
+[Jxck-S/airline-logos](https://github.com/Jxck-S/airline-logos) (by ICAO code,
+for every airline in flight-tracker's `airlines.js` plus a few bizjet
+operators) into `logos/raw/`, dithers it to 1-bit and writes
+`src/generated/logos_gen.h`. `logos/preview.png` shows them all as the panel
+will. Drop `logos/custom/<ICAO>.png` in to replace one, then rerun the script.
+`logos/` is git-ignored: the logos are the airlines' trademarks. Aircraft with
+no logo get a silhouette by aircraft class.
 
 Refresh: when the aircraft changes (~3.3 s) the panel is wiped to white and
 the new screen drawn from that clean state, which is Elecrow's own sequence. A
@@ -52,7 +62,8 @@ plain full refresh of an image left the previous screen ghosted. Partial
 refresh (~0.9 s) when only the numbers change, and a forced clean redraw every
 20 partials or 30 minutes.
 
-Serial commands (115200): `d` dump screen, `f` force full refresh, `n` next demo flight.
+Serial commands (115200): `d` dump screen, `f` force full refresh, `n` next demo flight
+(in live mode it shows until the next poll, handy for checking a logo).
 `python tools/grab_screen.py NAME [--next] [--compare mockup_1bit.png]` saves the
 panel's current frame to `docs/screens/` (and diffs it against a mockup).
 
@@ -64,8 +75,9 @@ panel's current frame to `docs/screens/` (and diffs it against a mockup).
 - `src/display.cpp` — full/partial refresh on top of the vendor driver
 - `src/flight.cpp` — parses the endpoint's JSON
 - `src/secrets.h` — your settings (git-ignored); template in `secrets.example.h`
-- `src/generated/fonts_gen.h` — bitmap fonts, generated at build time (git-ignored)
-- `tools/` — `mockup.py` (mockups + dithering), `fontgen.py`, `grab_screen.py`
+- `src/generated/` — bitmap fonts and logos, generated at build time (git-ignored)
+- `src/logo.cpp` — logo lookup by ICAO code
+- `tools/` — `mockup.py` (mockups + dithering), `fontgen.py`, `logogen.py`, `grab_screen.py`
 - `lib/EPD_Driver/` — vendored copy of Elecrow's official low-level EPD driver (bit-banged SPI, SSD1683 register sequences), from [Elecrow-RD/ESP32_S3-Ink-Screen](https://github.com/Elecrow-RD/ESP32_S3-Ink-Screen)
 - `examples/refresh_timing.cpp` — the refresh-timing test that produced the numbers above
 - `vendor_reference/` — original unmodified Elecrow sample files, kept for reference
@@ -73,4 +85,5 @@ panel's current frame to `docs/screens/` (and diffs it against a mockup).
 ## Status
 
 Building the nearest-flight display. Phase 1 (server endpoint) and phase 2
-(firmware: Wi-Fi, fetch, layout, refresh) done; phase 3 is airline logos.
+(firmware: Wi-Fi, fetch, layout, refresh) done; phase 3 (airline logos)
+done and checked on the panel.

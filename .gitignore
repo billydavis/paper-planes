@@ -6,3 +6,4 @@
 src/secrets.h
 src/generated/
 __pycache__/
+logos/

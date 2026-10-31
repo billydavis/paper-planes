@@ -1,6 +1,8 @@
-# PlatformIO pre-build hook: regenerate src/generated/fonts_gen.h when it is
-# missing or older than tools/fontgen.py. Runs the system Python (which has
-# Pillow), not PlatformIO's own environment.
+# PlatformIO pre-build hook: regenerate the generated headers when they are
+# missing or older than the script that makes them. Runs the system Python
+# (which has Pillow), not PlatformIO's own environment.
+#   tools/fontgen.py -> src/generated/fonts_gen.h
+#   tools/logogen.py -> src/generated/logos_gen.h (downloads logos it lacks)
 import os
 import shutil
 import subprocess
@@ -8,9 +10,10 @@ import subprocess
 Import("env")  # noqa: F821  (provided by PlatformIO)
 
 root = env["PROJECT_DIR"]  # noqa: F821
-gen = os.path.join(root, "tools", "fontgen.py")
-out = os.path.join(root, "src", "generated", "fonts_gen.h")
+py = shutil.which("python") or shutil.which("python3") or "python"
 
-if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(gen):
-    py = shutil.which("python") or shutil.which("python3") or "python"
-    subprocess.check_call([py, gen])
+for script, header in (("fontgen.py", "fonts_gen.h"), ("logogen.py", "logos_gen.h")):
+    gen = os.path.join(root, "tools", script)
+    out = os.path.join(root, "src", "generated", header)
+    if not os.path.exists(out) or os.path.getmtime(out) < os.path.getmtime(gen):
+        subprocess.check_call([py, gen])
