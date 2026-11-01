@@ -1,0 +1,68 @@
+{
+ "expected": {
+  "airline": null,
+  "alt_ft": 3500,
+  "bearing_deg": 41,
+  "callsign": "N172SP",
+  "category": "A1",
+  "compass": "NE",
+  "dist_nm": 2.4,
+  "emergency": false,
+  "flight": "N172SP",
+  "gs_kt": 105,
+  "hex": "a1b2c3",
+  "in_range": 1,
+  "radius_nm": 15.0,
+  "reg": "N172SP",
+  "route": null,
+  "shape": "ga",
+  "squawk": "1234",
+  "status": "ok",
+  "track_deg": 180,
+  "type_code": "C172",
+  "type_name": "Cessna 172S Skyhawk SP",
+  "vrate_fpm": 0,
+  "vtrend": "level"
+ },
+ "home": {
+  "lat": 30.62,
+  "lon": -97.63,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "adsbdb_aircraft": {
+   "response": {
+    "aircraft": {
+     "icao_type": "C172",
+     "manufacturer": "Cessna",
+     "registration": "N172SP",
+     "type": "172S Skyhawk SP"
+    }
+   }
+  },
+  "adsbdb_callsign": null,
+  "feed": {
+   "ac": [
+    {
+     "alt_baro": 3500,
+     "baro_rate": 0,
+     "category": "A1",
+     "flight": "N172SP",
+     "gs": 105,
+     "hex": "a1b2c3",
+     "lat": 30.65,
+     "lon": -97.6,
+     "r": "N172SP",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "C172",
+     "track": 180
+    }
+   ]
+  },
+  "hexdb_aircraft": null,
+  "hexdb_route": null
+ },
+ "sticky": null
+}

@@ -1,4 +1,4 @@
-#include "logo.h"
+#include "ui/logo.h"
 
 #include <string.h>
 

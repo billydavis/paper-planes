@@ -1,0 +1,281 @@
+{
+ "airlines": {
+  "AAL": {
+   "iata": "AA",
+   "name": "American"
+  },
+  "AAY": {
+   "iata": "G4",
+   "name": "Allegiant"
+  },
+  "ABX": {
+   "iata": "GB",
+   "name": "ABX Air"
+  },
+  "ACA": {
+   "iata": "AC",
+   "name": "Air Canada"
+  },
+  "AFR": {
+   "iata": "AF",
+   "name": "Air France"
+  },
+  "AMX": {
+   "iata": "AM",
+   "name": "Aeromexico"
+  },
+  "ANA": {
+   "iata": "NH",
+   "name": "All Nippon"
+  },
+  "ANZ": {
+   "iata": "NZ",
+   "name": "Air New Zealand"
+  },
+  "ASA": {
+   "iata": "AS",
+   "name": "Alaska"
+  },
+  "ASH": {
+   "iata": "YV",
+   "name": "Mesa"
+  },
+  "ATN": {
+   "iata": "8C",
+   "name": "Air Transport Intl"
+  },
+  "AUA": {
+   "iata": "OS",
+   "name": "Austrian"
+  },
+  "AVA": {
+   "iata": "AV",
+   "name": "Avianca"
+  },
+  "AWI": {
+   "iata": "ZW",
+   "name": "Air Wisconsin"
+  },
+  "AZU": {
+   "iata": "AD",
+   "name": "Azul"
+  },
+  "BAW": {
+   "iata": "BA",
+   "name": "British Airways"
+  },
+  "CCA": {
+   "iata": "CA",
+   "name": "Air China"
+  },
+  "CES": {
+   "iata": "MU",
+   "name": "China Eastern"
+  },
+  "CKS": {
+   "iata": "K4",
+   "name": "Kalitta Air"
+  },
+  "CMP": {
+   "iata": "CM",
+   "name": "Copa Airlines"
+  },
+  "CPA": {
+   "iata": "CX",
+   "name": "Cathay Pacific"
+  },
+  "CPZ": {
+   "iata": "CP",
+   "name": "Compass"
+  },
+  "CSN": {
+   "iata": "CZ",
+   "name": "China Southern"
+  },
+  "DAL": {
+   "iata": "DL",
+   "name": "Delta"
+  },
+  "DLH": {
+   "iata": "LH",
+   "name": "Lufthansa"
+  },
+  "EDV": {
+   "iata": "9E",
+   "name": "Endeavor Air"
+  },
+  "EIN": {
+   "iata": "EI",
+   "name": "Aer Lingus"
+  },
+  "ENY": {
+   "iata": "MQ",
+   "name": "Envoy Air"
+  },
+  "ETD": {
+   "iata": "EY",
+   "name": "Etihad"
+  },
+  "EZY": {
+   "iata": "U2",
+   "name": "easyJet"
+  },
+  "FDX": {
+   "iata": "FX",
+   "name": "FedEx"
+  },
+  "FFT": {
+   "iata": "F9",
+   "name": "Frontier"
+  },
+  "FIN": {
+   "iata": "AY",
+   "name": "Finnair"
+  },
+  "GJS": {
+   "iata": "G7",
+   "name": "GoJet"
+  },
+  "GLO": {
+   "iata": "G3",
+   "name": "GOL"
+  },
+  "GTI": {
+   "iata": "5Y",
+   "name": "Atlas Air"
+  },
+  "HAL": {
+   "iata": "HA",
+   "name": "Hawaiian"
+  },
+  "IBE": {
+   "iata": "IB",
+   "name": "Iberia"
+  },
+  "JAL": {
+   "iata": "JL",
+   "name": "Japan Airlines"
+  },
+  "JBU": {
+   "iata": "B6",
+   "name": "JetBlue"
+  },
+  "JIA": {
+   "iata": "OH",
+   "name": "PSA Airlines"
+  },
+  "JZA": {
+   "iata": "QK",
+   "name": "Jazz"
+  },
+  "KAL": {
+   "iata": "KE",
+   "name": "Korean Air"
+  },
+  "KLM": {
+   "iata": "KL",
+   "name": "KLM"
+  },
+  "LAN": {
+   "iata": "LA",
+   "name": "LATAM"
+  },
+  "NCR": {
+   "iata": "N8",
+   "name": "National Airlines"
+  },
+  "NKS": {
+   "iata": "NK",
+   "name": "Spirit"
+  },
+  "PDT": {
+   "iata": "PT",
+   "name": "Piedmont"
+  },
+  "QFA": {
+   "iata": "QF",
+   "name": "Qantas"
+  },
+  "QTR": {
+   "iata": "QR",
+   "name": "Qatar Airways"
+  },
+  "QXE": {
+   "iata": "QX",
+   "name": "Horizon Air"
+  },
+  "ROU": {
+   "iata": "RV",
+   "name": "Air Canada Rouge"
+  },
+  "RPA": {
+   "iata": "YX",
+   "name": "Republic"
+  },
+  "RYR": {
+   "iata": "FR",
+   "name": "Ryanair"
+  },
+  "SAS": {
+   "iata": "SK",
+   "name": "SAS"
+  },
+  "SCX": {
+   "iata": "SY",
+   "name": "Sun Country"
+  },
+  "SIA": {
+   "iata": "SQ",
+   "name": "Singapore Airlines"
+  },
+  "SKW": {
+   "iata": "OO",
+   "name": "SkyWest"
+  },
+  "SWA": {
+   "iata": "WN",
+   "name": "Southwest"
+  },
+  "SWR": {
+   "iata": "LX",
+   "name": "Swiss"
+  },
+  "TAP": {
+   "iata": "TP",
+   "name": "TAP Air Portugal"
+  },
+  "THY": {
+   "iata": "TK",
+   "name": "Turkish Airlines"
+  },
+  "TSC": {
+   "iata": "TS",
+   "name": "Air Transat"
+  },
+  "UAE": {
+   "iata": "EK",
+   "name": "Emirates"
+  },
+  "UAL": {
+   "iata": "UA",
+   "name": "United"
+  },
+  "UPS": {
+   "iata": "5X",
+   "name": "UPS"
+  },
+  "VIR": {
+   "iata": "VS",
+   "name": "Virgin Atlantic"
+  },
+  "VOI": {
+   "iata": "Y4",
+   "name": "Volaris"
+  },
+  "WJA": {
+   "iata": "WS",
+   "name": "WestJet"
+  }
+ },
+ "source": "flight-tracker airlines.js + epaper.py IATA"
+}

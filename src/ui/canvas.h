@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include "font.h"
+#include "ui/font.h"
 
 // A 792x272 1-bit drawing surface in screen coordinates (0,0 = top left,
 // x across the long side). Bit set = black. Kept separate from the driver's
@@ -26,10 +26,6 @@ class Canvas {
   int text(int x, int y, const char *s, const Font &f, int track = 0, bool black = true);
   int textRight(int xr, int y, const char *s, const Font &f, int track = 0, bool black = true);
   static int textWidth(const char *s, const Font &f, int track = 0);
-
-  // Copy into the Elecrow driver's buffer (via Paint_SetPixel, which knows
-  // about rotation and the chip gap).
-  void toDriver() const;
 
   bool operator==(const Canvas &o) const;
   bool operator!=(const Canvas &o) const { return !(*this == o); }

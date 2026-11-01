@@ -1,4 +1,9 @@
-# `/api/epaper/nearest` — what the board fetches
+# `/api/epaper/nearest` — the nearest-aircraft JSON
+
+> The board no longer calls this. It now does the same lookups itself
+> (`lib/flights/src/route.cpp`, `src/flights/sources.cpp`) and serves the same JSON at `http://flights.local/api/nearest`
+> (plus the aircraft's `lat`/`lon`). The server
+> endpoint below still works and is kept as the reference the port follows.
 
 Served by the flight-tracker project (`../flight-tracker`, code in
 `src/server/epaper.py`). One request returns everything the screen needs.

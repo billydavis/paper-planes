@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Settings</title>
+<link rel=stylesheet href=/style.css>
+</head>
+<body>
+<main>
+<header><h1>Settings</h1><nav><a href=/>Back to the screen</a></nav></header>
+<p id=setup class=note hidden>Setup mode: the board couldn't join Wi-Fi, so it's running its own hotspot. Pick your network below and save.</p>
+<!-- Input names are the keys in lib/settings/src/settings.cpp (SETTINGS_FIELDS). -->
+<form id=form>
+<div class=card><h2>Wi-Fi</h2>
+  <label for=ssid>Network</label><input id=ssid name=ssid list=nets autocomplete=off><datalist id=nets></datalist>
+  <label for=pass>Password</label><input id=pass name=pass type=password placeholder="Leave blank to keep the saved one" autocomplete=new-password>
+  <label for=host>Name on the network</label><input id=host name=host pattern="[a-zA-Z0-9-]+">
+  <p class=hint>The board is reachable at http://<i>name</i>.local. Changing Wi-Fi or the name restarts the board.</p>
+</div>
+
+<div class=card><h2>Location</h2>
+  <div class=row>
+    <div><label for=lat>Home latitude</label><input id=lat name=lat inputmode=decimal></div>
+    <div><label for=lon>Home longitude</label><input id=lon name=lon inputmode=decimal></div>
+  </div>
+  <div class=row>
+    <div><label for=radius>Search radius (nm)</label><input id=radius name=radius type=number min=1 max=100></div>
+    <div><label for=poll>Check every (seconds)</label><input id=poll name=poll type=number min=5 max=300></div>
+  </div>
+  <label for=zone>Time zone</label><select id=zone></select>
+  <input id=tz name=tz placeholder="POSIX TZ string, e.g. EST5EDT,M3.2.0,M11.1.0" style="margin-top:8px">
+</div>
+
+<div class=card><h2>Night hours</h2>
+  <label class=check><input type=checkbox id=night name=night>Turn the screen off at night</label>
+  <div class=row>
+    <div><label for=nstart>Off at</label><input id=nstart name=nstart type=time></div>
+    <div><label for=nend>Back on at</label><input id=nend name=nend type=time></div>
+  </div>
+  <p class=hint>The screen is cleared and powered down, and no flights are looked up. This page keeps working.</p>
+</div>
+
+<div class=card><h2>Security and testing</h2>
+  <p>Settings password: <span id=webstate></span></p>
+  <label for=webpass>New settings password</label><input id=webpass name=webpass type=password placeholder="Leave blank to keep it" autocomplete=new-password>
+  <label class=check><input type=checkbox name=webpass_clear>Remove the password</label>
+  <label class=check><input type=checkbox id=demo name=demo>Demo mode (sample flights, no network lookups)</label>
+</div>
+<button type=submit>Save</button> <span id=msg class=hint></span>
+</form>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const ZONES = [
+  ['US Eastern', 'EST5EDT,M3.2.0,M11.1.0'], ['US Central', 'CST6CDT,M3.2.0,M11.1.0'],
+  ['US Mountain', 'MST7MDT,M3.2.0,M11.1.0'], ['Arizona', 'MST7'],
+  ['US Pacific', 'PST8PDT,M3.2.0,M11.1.0'], ['Alaska', 'AKST9AKDT,M3.2.0,M11.1.0'],
+  ['Hawaii', 'HST10'], ['UK / Ireland', 'GMT0BST,M3.5.0/1,M10.5.0'],
+  ['Central Europe', 'CET-1CEST,M3.5.0,M10.5.0/3'], ['UTC', 'UTC0'],
+];
+
+function fillZones(tz) {
+  const sel = $('#zone');
+  for (const [name, value] of ZONES) sel.add(new Option(name, value, false, value === tz));
+  sel.add(new Option('Other (type below)', '', false, !ZONES.some(z => z[1] === tz)));
+  sel.onchange = () => { if (sel.value) $('#tz').value = sel.value; };
+}
+
+async function load() {
+  const r = await fetch('/api/settings', {cache: 'no-store'});
+  if (!r.ok) { $('#msg').textContent = 'Could not load the settings (' + r.status + ').'; return; }
+  const s = await r.json();
+  for (const k of ['ssid', 'host', 'lat', 'lon', 'radius', 'poll', 'tz', 'nstart', 'nend']) $('#' + k).value = s[k];
+  $('#night').checked = s.night;
+  $('#demo').checked = s.demo;
+  $('#webstate').textContent = s.webpass_set ? 'set (user name: admin).'
+    : 'none: anyone on your network can change settings, and firmware updates are off until one is set.';
+  $('#setup').hidden = !s.setup_mode;
+  fillZones(s.tz);
+  // The Wi-Fi scan takes a few seconds; fill the list when it's done.
+  fetch('/api/networks').then(r => r.json()).then(list => {
+    for (const n of list) $('#nets').append(new Option(n));
+  }).catch(() => {});
+}
+
+$('#form').onsubmit = async e => {
+  e.preventDefault();
+  $('#msg').textContent = 'Saving...';
+  try {
+    const r = await fetch('/settings', {method: 'POST', body: new URLSearchParams(new FormData($('#form')))});
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    $('#msg').className = 'hint ok';
+    $('#msg').innerHTML = j.restart
+      ? `Saved. The board is restarting; it will be back in about 20 seconds at <a href="${j.url}">${j.url}</a>`
+      : 'Saved. The new settings are in use now.';
+    for (const k of ['pass', 'webpass']) $('#' + k).value = '';
+  } catch (err) {
+    $('#msg').className = 'hint warn';
+    $('#msg').textContent = 'Not saved: ' + err.message;
+  }
+};
+load();
+</script>
+</body>
+</html>

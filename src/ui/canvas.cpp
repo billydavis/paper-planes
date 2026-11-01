@@ -1,9 +1,9 @@
-#include "canvas.h"
+#include "ui/canvas.h"
 
 #include <math.h>
 #include <string.h>
 
-#include "EPD.h"
+
 
 void Canvas::clear() { memset(buf, 0, sizeof(buf)); }
 
@@ -126,13 +126,6 @@ int Canvas::textRight(int xr, int y, const char *s, const Font &f, int track, bo
   int w = textWidth(s, f, track);
   text(xr - w, y, s, f, track, black);
   return w;
-}
-
-void Canvas::toDriver() const {
-  Paint_Clear(WHITE);
-  for (int y = 0; y < H; y++)
-    for (int x = 0; x < W; x++)
-      if (get(x, y)) Paint_SetPixel(x, y, BLACK);
 }
 
 bool Canvas::operator==(const Canvas &o) const { return memcmp(buf, o.buf, sizeof(buf)) == 0; }

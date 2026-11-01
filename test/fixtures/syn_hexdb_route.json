@@ -1,0 +1,79 @@
+{
+ "expected": {
+  "airline": {
+   "iata": "DL",
+   "icao": "DAL",
+   "name": "Delta"
+  },
+  "alt_ft": 35000,
+  "bearing_deg": 0,
+  "callsign": "DAL123",
+  "category": "A3",
+  "compass": "N",
+  "dist_nm": 0.0,
+  "emergency": false,
+  "flight": "DL 123",
+  "gs_kt": 180,
+  "hex": "abc123",
+  "in_range": 1,
+  "radius_nm": 15.0,
+  "reg": "N123DL",
+  "route": {
+   "basis": "scheduled",
+   "from": {
+    "city": "Atlanta",
+    "code": "ATL"
+   },
+   "to": {
+    "city": "Orlando",
+    "code": "MCO"
+   }
+  },
+  "shape": "narrowbody",
+  "squawk": "1234",
+  "status": "ok",
+  "track_deg": 150,
+  "type_code": "A321",
+  "type_name": "Airbus A321-211",
+  "vrate_fpm": 0,
+  "vtrend": "level"
+ },
+ "home": {
+  "lat": 31.0,
+  "lon": -82.9,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "adsbdb_callsign": null,
+  "feed": {
+   "ac": [
+    {
+     "alt_baro": 35000,
+     "baro_rate": 0,
+     "category": "A3",
+     "flight": "DAL123  ",
+     "gs": 180,
+     "hex": "abc123",
+     "lat": 31.0,
+     "lon": -82.9,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "A321",
+     "track": 150
+    }
+   ]
+  },
+  "hexdb_aircraft": {
+   "ICAOTypeCode": "A321",
+   "Manufacturer": "Airbus",
+   "Registration": "N123DL",
+   "Type": "A321-211"
+  },
+  "hexdb_route": {
+   "route": "KATL-KMCO"
+  }
+ },
+ "sticky": null
+}

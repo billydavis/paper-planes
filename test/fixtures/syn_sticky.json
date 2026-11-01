@@ -1,0 +1,78 @@
+{
+ "expected": {
+  "airline": {
+   "iata": "UA",
+   "icao": "UAL",
+   "name": "United"
+  },
+  "alt_ft": 9000,
+  "bearing_deg": 270,
+  "callsign": "UAL2",
+  "category": "A3",
+  "compass": "W",
+  "dist_nm": 3.3,
+  "emergency": false,
+  "flight": "UA 2",
+  "gs_kt": 180,
+  "hex": "bbb222",
+  "in_range": 2,
+  "radius_nm": 15.0,
+  "reg": "N123DL",
+  "route": null,
+  "shape": "narrowbody",
+  "squawk": "1234",
+  "status": "ok",
+  "track_deg": 180,
+  "type_code": "A321",
+  "type_name": "A321",
+  "vrate_fpm": 0,
+  "vtrend": "level"
+ },
+ "home": {
+  "lat": 33.7,
+  "lon": -84.4,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "adsbdb_aircraft": null,
+  "adsbdb_callsign": null,
+  "feed": {
+   "ac": [
+    {
+     "alt_baro": 9000,
+     "baro_rate": 0,
+     "category": "A3",
+     "flight": "SWA1",
+     "gs": 180,
+     "hex": "aaa111",
+     "lat": 33.75,
+     "lon": -84.4,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "A321",
+     "track": 180
+    },
+    {
+     "alt_baro": 9000,
+     "baro_rate": 0,
+     "category": "A3",
+     "flight": "UAL2",
+     "gs": 180,
+     "hex": "bbb222",
+     "lat": 33.7,
+     "lon": -84.466,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "A321",
+     "track": 180
+    }
+   ]
+  },
+  "hexdb_aircraft": null,
+  "hexdb_route": null
+ },
+ "sticky": "bbb222"
+}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Updates</title>
+<link rel=stylesheet href=/style.css>
+</head>
+<body>
+<main>
+<header><h1>Updates</h1><nav><a href=/>Back to the screen</a></nav></header>
+<form class=card method=post action="/update?target=firmware" enctype=multipart/form-data>
+  <h2>Firmware</h2>
+  <p class=hint style="margin:0 0 10px">.pio/build/esp32-s3-devkitc-1/firmware.bin. Settings are kept. The board restarts when it's done.</p>
+  <input type=file name=file accept=.bin required>
+  <button type=submit>Install firmware</button>
+</form>
+<form class=card method=post action="/update?target=airports" enctype=multipart/form-data>
+  <h2>Airport data</h2>
+  <p class=hint style="margin:0 0 10px">src/generated/airports.bin, rebuilt from flight-tracker's airport list by tools/datagen.py. Only needed when that list changes. The board restarts when it's done.</p>
+  <input type=file name=file accept=.bin required>
+  <button type=submit>Install airport data</button>
+</form>
+</main>
+</body>
+</html>
