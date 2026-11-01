@@ -4,7 +4,7 @@
 #include "generated/certs_gen.h"
 
 // hexdb asks for a User-Agent that says who's calling.
-static const char *UA = "nearest-flight-epaper/2.0 (+https://github.com/example/nearest-flight)";
+static const char *UA = "paper-planes/2.0 (+https://github.com/billydavis/paper-planes)";
 
 static void hostOf(const char *url, char *out, size_t n) {
   const char *p = strstr(url, "://");

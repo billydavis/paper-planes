@@ -199,7 +199,7 @@ static void applySettings(const Settings &s) {
 // ---- entry points ---------------------------------------------------------------------
 void appBegin() {
   loadSettings(cfg);
-  LOGI("boot", "nearest-flight %s, %s", FW_VERSION, cfg.demo ? "demo mode" : cfg.wifiSsid);
+  LOGI("boot", "paper-planes %s, %s", FW_VERSION, cfg.demo ? "demo mode" : cfg.wifiSsid);
   LOGI("boot", "PSRAM %u KB, free heap %u KB", ESP.getPsramSize() / 1024, ESP.getFreeHeap() / 1024);
   display.begin();
   airportDataBegin();

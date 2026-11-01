@@ -1,4 +1,8 @@
-# CrowPanel 5.79" E-Paper (ESP32-S3) — exploration project
+# paper-planes
+
+The aircraft nearest to home, on a CrowPanel 5.79" e-paper display (ESP32-S3).
+Stand-alone: the board looks the flights up itself and serves the same screen
+and its settings at http://flights.local.
 
 Hardware: [Elecrow CrowPanel ESP32 E-Paper 5.79-inch HMI Display](https://elecrow.com/wiki/CrowPanel_ESP32_E-paper_5.79-inch_HMI_Display.html)
 
@@ -32,7 +36,7 @@ Restore with:
 python -m esptool --port COM5 write-flash 0x0 crowpanel_579_full_8MB_backup_2026-10-26.bin
 ```
 
-## Nearest-flight display (current firmware)
+## The display (current firmware)
 
 Shows the closest airborne aircraft. The board does all the work itself, with
 no PC in the loop: it asks the free ADS-B feeds (adsb.lol, then adsb.fi) for
@@ -196,7 +200,7 @@ numbers above), `vendor_reference/` (Elecrow's original sample files),
 
 ## Status
 
-Building the nearest-flight display. Phase 1 (server endpoint) and phase 2
+Building paper-planes. Phase 1 (server endpoint) and phase 2
 (firmware: Wi-Fi, fetch, layout, refresh) done; phase 3 (airline logos)
 done and checked on the panel. Phase 4 (stand-alone: lookups on the board,
 web page at flights.local, night hours) done. Phase 5 (restructure: testable

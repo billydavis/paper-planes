@@ -1,4 +1,4 @@
-// Nearest-flight display for the CrowPanel 5.79" e-paper board.
+// paper-planes: the nearest aircraft on the CrowPanel 5.79" e-paper board.
 //
 // Stand-alone: the board asks the ADS-B feeds for aircraft near home, works
 // out the nearest one and its route itself (a port of flight-tracker's
