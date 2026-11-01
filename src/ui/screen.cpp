@@ -231,7 +231,7 @@ void drawFlight(Canvas &c, const Flight &f, const char *caption) {
 }
 
 void drawMessage(Canvas &c, const char *title, const char *line1, const char *line2,
-                 const char *footer) {
+                 const char *footer, const char *line3) {
   c.clear();
   // Left: a small radar scope.
   for (int r = 96; r > 0; r -= 32) {
@@ -245,6 +245,7 @@ void drawMessage(Canvas &c, const char *title, const char *line1, const char *li
   textFit(c, X0, 34, title, FONT_BIG, XR - X0, 2);
   if (line1) textFit(c, X0, 118, line1, FONT_AIRCRAFT, XR - X0);
   if (line2) textFit(c, X0, 150, line2, FONT_CITY, XR - X0);
+  if (line3) textFit(c, X0, 176, line3, FONT_CITY, XR - X0);
   c.hline(X0, XR, 202);
   if (footer) c.text(X0, 214, footer, FONT_LABEL, 2);
 }

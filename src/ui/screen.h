@@ -9,6 +9,6 @@
 // callsign; a stale-data warning when updates have stopped).
 void drawFlight(Canvas &c, const Flight &f, const char *caption);
 
-// Big title + two lines of detail, for "quiet skies", "no Wi-Fi" and so on.
+// Big title + up to three lines of detail, for "quiet skies", "no Wi-Fi" and so on.
 void drawMessage(Canvas &c, const char *title, const char *line1, const char *line2,
-                 const char *footer);
+                 const char *footer, const char *line3 = nullptr);

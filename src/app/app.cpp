@@ -87,11 +87,15 @@ static void render(Mode m, bool force) {
   } else {
     char l1[96], l2[64], foot[40] = "";
     switch (m) {
-      case Mode::Setup:
-        snprintf(l1, sizeof(l1), "Join Wi-Fi \"%s\", password %s", SETUP_AP_SSID, setupApPassword());
-        snprintf(l2, sizeof(l2), "then open http://%s", WiFi.softAPIP().toString().c_str());
-        drawMessage(canvas, "SETUP", l1, l2, cfg.wifiSsid[0] ? "COULDN'T JOIN SAVED WI-FI" : "NO WI-FI SAVED YET");
+      case Mode::Setup: {
+        // The password gets a line of its own so it's never cut short.
+        char l3[48];
+        snprintf(l1, sizeof(l1), "Join Wi-Fi \"%s\"", SETUP_AP_SSID);
+        snprintf(l2, sizeof(l2), "Password: %s", setupApPassword());
+        snprintf(l3, sizeof(l3), "then open http://%s", WiFi.softAPIP().toString().c_str());
+        drawMessage(canvas, "SETUP", l1, l2, cfg.wifiSsid[0] ? "COULDN'T JOIN SAVED WI-FI" : "NO WI-FI SAVED YET", l3);
         break;
+      }
       case Mode::NoWifi:
         snprintf(l1, sizeof(l1), "Trying to join %s", cfg.wifiSsid);
         drawMessage(canvas, "NO WI-FI", l1, "Restart the board for the setup hotspot", nullptr);
