@@ -122,6 +122,33 @@ void test_flight_json_round_trip() {
   TEST_ASSERT_EQUAL(NO_VALUE, back.trackDeg);
 }
 
+// ArduinoJson 7.3+ stores char arrays by pointer; the JSON must not change
+// (or turn to garbage) when the Flight it came from is overwritten.
+void test_flight_json_owns_its_strings() {
+  Flight f;
+  f.ok = true;
+  scopy(f.hex, "a1b2c3");
+  f.hasAirline = true;
+  scopy(f.airlineIcao, "AAL");
+  scopy(f.airlineName, "American");
+  scopy(f.shape, "narrowbody");
+  f.hasRoute = f.hasTo = true;
+  scopy(f.from.code, "ATL");
+  scopy(f.from.city, "Atlanta");
+  scopy(f.to.code, "DFW");
+  scopy(f.to.city, "Dallas");
+  scopy(f.basis, "track");
+  scopy(f.vtrend, "up");
+  JsonDocument doc;
+  flightToJson(f, doc);
+  memset((void *)&f, 'x', sizeof(f));
+  std::string out;
+  serializeJson(doc, out);
+  TEST_ASSERT_EQUAL_STRING_MESSAGE(std::string::npos == out.find("xxx") ? "clean" : out.c_str(), "clean", "points into Flight");
+  TEST_ASSERT_EQUAL_STRING("a1b2c3", doc["hex"]);
+  TEST_ASSERT_EQUAL_STRING("Dallas", doc["route"]["to"]["city"]);
+}
+
 // ---- route rules -------------------------------------------------------------------------
 static Live liveAt(double lat, double lon, double alt, double vrate, const char *cs, const char *cat = "A3") {
   Live l;
@@ -235,6 +262,7 @@ int main() {
   RUN_TEST(test_nearest_airport_kinds_and_cone);
   RUN_TEST(test_corrupt_image_is_rejected);
   RUN_TEST(test_flight_json_round_trip);
+  RUN_TEST(test_flight_json_owns_its_strings);
   RUN_TEST(test_departure_memory_follows_callsign_and_expires);
   RUN_TEST(test_hex_and_callsign_are_sanitized_for_urls);
   RUN_TEST(test_mute_list_expiry_and_labels);

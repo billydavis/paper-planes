@@ -122,8 +122,8 @@ static void mutesToJson(JsonDocument &doc) {
     const MuteList::Entry &e = list.at(i);
     if (!e.hex[0]) continue;
     JsonObject o = arr.add<JsonObject>();
-    o["hex"] = e.hex;
-    o["label"] = e.label;
+    o["hex"] = (const char *)e.hex;   // char arrays are stored by pointer; copy them
+    o["label"] = (const char *)e.label;
     if (e.until) o["until"] = e.until; else o["until"] = nullptr;   // null = until unmuted
   }
   doc["clock_set"] = mutesNow() != 0;

@@ -75,20 +75,25 @@ bool parseFlight(const char *json, Flight &f) {
 template <typename V> static void put(V &&v, const char *s) { if (s[0]) v.set(s); else v.set(nullptr); }
 template <typename V> static void put(V &&v, int32_t n) { if (n != NO_VALUE) v.set(n); else v.set(nullptr); }
 
+// ArduinoJson 7.3+ stores a char array (`const char[N]`) by pointer, taking it
+// for a string literal; a `const char *` is copied. The doc must not point into
+// `f`, which the caller may change or free before the doc is serialized.
+static const char *byCopy(const char *s) { return s; }
+
 void flightToJson(const Flight &f, JsonDocument &doc) {
   doc.clear();
   doc["status"] = f.ok ? "ok" : "none";
   doc["updated"] = f.updated;
   doc["radius_nm"] = f.radiusNm;
   if (!f.ok) return;
-  doc["hex"] = f.hex;
+  doc["hex"] = byCopy(f.hex);
   put(doc["callsign"], f.callsign);
   put(doc["flight"], f.flight);
   if (f.hasAirline) {
     JsonObject al = doc["airline"].to<JsonObject>();
-    al["icao"] = f.airlineIcao;
+    al["icao"] = byCopy(f.airlineIcao);
     put(al["iata"], f.airlineIata);
-    al["name"] = f.airlineName;
+    al["name"] = byCopy(f.airlineName);
   } else {
     doc["airline"] = nullptr;
   }
@@ -96,24 +101,24 @@ void flightToJson(const Flight &f, JsonDocument &doc) {
   put(doc["type_code"], f.typeCode);
   put(doc["type_name"], f.typeName);
   put(doc["category"], f.category);
-  doc["shape"] = f.shape;
+  doc["shape"] = byCopy(f.shape);
   if (f.hasRoute) {
     JsonObject rt = doc["route"].to<JsonObject>();
-    rt["from"]["code"] = f.from.code;
-    rt["from"]["city"] = f.from.city;
+    rt["from"]["code"] = byCopy(f.from.code);
+    rt["from"]["city"] = byCopy(f.from.city);
     if (f.hasTo) {
-      rt["to"]["code"] = f.to.code;
-      rt["to"]["city"] = f.to.city;
+      rt["to"]["code"] = byCopy(f.to.code);
+      rt["to"]["city"] = byCopy(f.to.city);
     } else {
       rt["to"] = nullptr;
     }
-    rt["basis"] = f.basis;
+    rt["basis"] = byCopy(f.basis);
   } else {
     doc["route"] = nullptr;
   }
   put(doc["alt_ft"], f.altFt);
   put(doc["vrate_fpm"], f.vrateFpm);
-  doc["vtrend"] = f.vtrend;
+  doc["vtrend"] = byCopy(f.vtrend);
   put(doc["gs_kt"], f.gsKt);
   put(doc["track_deg"], f.trackDeg);
   doc["dist_nm"] = roundf(f.distNm * 10) / 10;
