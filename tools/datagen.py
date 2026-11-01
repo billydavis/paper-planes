@@ -137,10 +137,19 @@ def airlines_from_flight_tracker(ft):
 def write_airlines(ft):
     table = airlines_from_flight_tracker(ft)
     if table is not None:
-        with open(SNAPSHOT, "w", encoding="utf-8", newline="\n") as f:
-            json.dump({"source": "flight-tracker airlines.js + epaper.py IATA", "airlines": table}, f,
-                      indent=1, sort_keys=True)
-            f.write("\n")
+        # Only rewrite when the data changed: the checkout may hold CRLF line
+        # endings (core.autocrlf), and an LF rewrite would make git, and the
+        # build's version string, report the tree as dirty.
+        snapshot = {"source": "flight-tracker airlines.js + epaper.py IATA", "airlines": table}
+        try:
+            with open(SNAPSHOT, encoding="utf-8") as f:
+                unchanged = json.load(f) == snapshot
+        except (OSError, ValueError):
+            unchanged = False
+        if not unchanged:
+            with open(SNAPSHOT, "w", encoding="utf-8", newline="\n") as f:
+                json.dump(snapshot, f, indent=1, sort_keys=True)
+                f.write("\n")
     else:
         print(f"datagen: no flight-tracker checkout; using {os.path.relpath(SNAPSHOT, ROOT)}")
         with open(SNAPSHOT, encoding="utf-8") as f:
