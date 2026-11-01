@@ -1,5 +1,5 @@
 #pragma once
-#include "canvas.h"
+#include "ui/canvas.h"
 #include "flight.h"
 
 // Screen layouts. Coordinates follow tools/mockup.py so the panel matches the

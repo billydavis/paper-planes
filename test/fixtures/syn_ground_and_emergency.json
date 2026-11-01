@@ -1,0 +1,74 @@
+{
+ "expected": {
+  "airline": null,
+  "alt_ft": 4500,
+  "bearing_deg": 0,
+  "callsign": "N5",
+  "category": "A1",
+  "compass": "N",
+  "dist_nm": 6.0,
+  "emergency": true,
+  "flight": "N5",
+  "gs_kt": 180,
+  "hex": "ddd444",
+  "in_range": 1,
+  "radius_nm": 15.0,
+  "reg": "N123DL",
+  "route": null,
+  "shape": "ga",
+  "squawk": "7700",
+  "status": "ok",
+  "track_deg": 180,
+  "type_code": "A321",
+  "type_name": "A321",
+  "vrate_fpm": -200,
+  "vtrend": "down"
+ },
+ "home": {
+  "lat": 33.7,
+  "lon": -84.4,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "adsbdb_aircraft": null,
+  "adsbdb_callsign": null,
+  "feed": {
+   "ac": [
+    {
+     "alt_baro": "ground",
+     "baro_rate": 1800,
+     "category": "A3",
+     "flight": "DAL123  ",
+     "gs": 180,
+     "hex": "ccc333",
+     "lat": 33.701,
+     "lon": -84.401,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "A321",
+     "track": 180
+    },
+    {
+     "alt_baro": 4500,
+     "baro_rate": -200,
+     "category": "A1",
+     "flight": "N5",
+     "gs": 180,
+     "hex": "ddd444",
+     "lat": 33.8,
+     "lon": -84.4,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "7700",
+     "t": "A321",
+     "track": 180
+    }
+   ]
+  },
+  "hexdb_aircraft": null,
+  "hexdb_route": null
+ },
+ "sticky": null
+}

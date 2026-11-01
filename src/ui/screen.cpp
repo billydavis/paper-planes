@@ -1,4 +1,4 @@
-#include "screen.h"
+#include "ui/screen.h"
 
 #include <initializer_list>
 #include <math.h>
@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "generated/fonts_gen.h"
-#include "logo.h"
+#include "ui/logo.h"
 
 static const int X0 = 292, XR = 776;   // right-hand column
 static const int LOGO_CX = 136;        // centre of the logo panel

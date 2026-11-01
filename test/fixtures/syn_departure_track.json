@@ -1,0 +1,95 @@
+{
+ "expected": {
+  "airline": {
+   "iata": "DL",
+   "icao": "DAL",
+   "name": "Delta"
+  },
+  "alt_ft": 2000,
+  "bearing_deg": 203,
+  "callsign": "DAL123",
+  "category": "A3",
+  "compass": "SW",
+  "dist_nm": 2.6,
+  "emergency": false,
+  "flight": "DL 123",
+  "gs_kt": 180,
+  "hex": "abc123",
+  "in_range": 1,
+  "radius_nm": 15.0,
+  "reg": "N123DL",
+  "route": {
+   "basis": "track",
+   "from": {
+    "city": "Atlanta",
+    "code": "ATL"
+   },
+   "to": null
+  },
+  "shape": "narrowbody",
+  "squawk": "1234",
+  "status": "ok",
+  "track_deg": 180,
+  "type_code": "A321",
+  "type_name": "Airbus A321-211",
+  "vrate_fpm": 1800,
+  "vtrend": "up"
+ },
+ "home": {
+  "lat": 33.7,
+  "lon": -84.4,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "adsbdb_callsign": {
+   "response": {
+    "flightroute": {
+     "destination": {
+      "iata_code": "SEA",
+      "icao_code": "KSEA",
+      "latitude": 47.449,
+      "longitude": -122.3093,
+      "municipality": "Seattle",
+      "name": "Seattle Airport"
+     },
+     "origin": {
+      "iata_code": "BOS",
+      "icao_code": "KBOS",
+      "latitude": 42.3643,
+      "longitude": -71.0052,
+      "municipality": "Boston",
+      "name": "Boston Airport"
+     }
+    }
+   }
+  },
+  "feed": {
+   "ac": [
+    {
+     "alt_baro": 2000,
+     "baro_rate": 1800,
+     "category": "A3",
+     "flight": "DAL123  ",
+     "gs": 180,
+     "hex": "abc123",
+     "lat": 33.66,
+     "lon": -84.42,
+     "r": "N123DL",
+     "seen_pos": 0.4,
+     "squawk": "1234",
+     "t": "A321",
+     "track": 180
+    }
+   ]
+  },
+  "hexdb_aircraft": {
+   "ICAOTypeCode": "A321",
+   "Manufacturer": "Airbus",
+   "Registration": "N123DL",
+   "Type": "A321-211"
+  },
+  "hexdb_route": null
+ },
+ "sticky": null
+}

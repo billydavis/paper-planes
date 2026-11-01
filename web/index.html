@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Paper Planes</title>
+<link rel=stylesheet href=/style.css>
+</head>
+<body>
+<main>
+<header>
+  <h1>Paper Planes</h1><span id=pill class=pill>connecting</span>
+  <nav><a href=/settings>Settings</a><a href=/api/nearest>JSON</a></nav>
+</header>
+<div class="card screen"><img id=screen src=/screen.bmp alt="What the e-paper screen shows now"></div>
+<div class=card id=flight><h2>On screen</h2><p class=mute>Waiting for the first update...</p></div>
+<div class=card><h2>Device</h2><dl id=device></dl></div>
+<p class="mute hint">Updates every few seconds. <a href=/update>Firmware and data updates</a></p>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const item = (k, v) => v == null || v === '' ? '' : `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`;
+const num = n => n == null ? null : Number(n).toLocaleString();
+const BASIS = {
+  confirmed: 'confirmed',
+  scheduled: 'scheduled, fits its position',
+  track: 'from what the plane is doing',
+  mismatch: "scheduled, but it doesn't fit where the plane is",
+};
+const TREND = {up: 'climbing', down: 'descending', level: 'level'};
+
+function ago(t) {
+  if (!t) return null;
+  const s = Math.max(0, Date.now() / 1000 - t);
+  return s < 90 ? Math.round(s) + ' s ago' : Math.round(s / 60) + ' min ago';
+}
+function uptime(s) {
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60);
+  return h ? `${h} h ${m} min` : `${m} min`;
+}
+
+function flightHtml(st) {
+  const f = st.flight;
+  if (/^night/.test(st.status)) return `<p>The screen is off for the night (${esc(st.status.replace(/^night, /, ''))}).</p>`;
+  if (!f) return '<p class=mute>Waiting for the first update...</p>';
+  if (f.status !== 'ok') return `<p>Nothing airborne within ${f.radius_nm} nm.</p><p class=mute>Checked ${esc(ago(f.updated) || '')}</p>`;
+  const r = f.route;
+  let h = '';
+  if (r) {
+    const to = r.to ? `${esc(r.to.code)} <small>${esc(r.to.city)}</small>` : '<small>destination not yet known</small>';
+    h += `<div class=route>${esc(r.from.code)} <small>${esc(r.from.city)}</small> &rarr; ${to}</div>`;
+  }
+  return h + '<dl>'
+    + item('Flight', f.flight) + item('Airline', f.airline && f.airline.name) + item('Aircraft', f.type_name)
+    + item('Registration', f.reg) + item('Altitude', f.alt_ft != null ? num(f.alt_ft) + ' ft, ' + TREND[f.vtrend] : null)
+    + item('Ground speed', f.gs_kt != null ? f.gs_kt + ' kt' : null) + item('Heading', f.track_deg != null ? f.track_deg + '°' : null)
+    + item('Distance', `${f.dist_nm} nm ${f.compass || ''}`) + item('Squawk', f.squawk + (f.emergency ? ' (emergency)' : ''))
+    + item('Route', r ? BASIS[r.basis] : null)
+    + item('In range', f.in_range + ' aircraft within ' + f.radius_nm + ' nm') + item('ICAO hex', f.hex)
+    + item('Updated', ago(f.updated)) + '</dl>';
+}
+
+let frame = -1;
+function draw(st) {
+  const d = st.device;
+  const pill = $('#pill');
+  pill.textContent = st.status;
+  pill.className = 'pill ' + (/^(live|demo)/.test(st.status) ? 'ok' : /no |setup|can't/i.test(st.status) ? 'bad' : '');
+  if (st.frame !== frame) { frame = st.frame; $('#screen').src = '/screen.bmp?f=' + frame; }
+  $('#flight').innerHTML = '<h2>On screen</h2>' + flightHtml(st);
+  $('#device').innerHTML = item('Address', `${d.hostname} (${d.ip})`)
+    + item('Wi-Fi', d.mode === 'setup' ? 'setup hotspot' : `${d.ssid}, ${d.rssi} dBm`)
+    + item('Home', `${d.home.lat.toFixed(4)}, ${d.home.lon.toFixed(4)} (${d.radius_nm} nm)`)
+    + item('Night hours', d.night ? d.night.replace('-', ' to ') : 'off')
+    + item('Airport data', d.airports)
+    + item('Firmware', d.version) + item('Up', uptime(d.uptime_s))
+    + item('Free memory', Math.round(d.heap / 1024) + ' KB' + (d.psram ? `, PSRAM ${Math.round(d.psram / 1024)} KB` : ''));
+}
+
+async function tick() {
+  try { draw(await (await fetch('/api/state', {cache: 'no-store'})).json()); }
+  catch (e) { $('#pill').textContent = 'not responding'; $('#pill').className = 'pill bad'; }
+  setTimeout(tick, 4000);
+}
+tick();
+</script>
+</body>
+</html>

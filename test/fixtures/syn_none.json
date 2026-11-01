@@ -1,0 +1,18 @@
+{
+ "expected": {
+  "radius_nm": 15.0,
+  "status": "none"
+ },
+ "home": {
+  "lat": 33.7,
+  "lon": -84.4,
+  "radius": 15
+ },
+ "note": "synthetic",
+ "replies": {
+  "feed": {
+   "ac": []
+  }
+ },
+ "sticky": null
+}

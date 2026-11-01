@@ -1,0 +1,14 @@
+# 8 MB flash.
+#   app0/app1  two 2.6 MB firmware slots, so updates can go over Wi-Fi
+#   airports   the airport table (src/generated/airports.bin, ~1.5 MB), kept
+#              out of the firmware so firmware updates stay small. Subtype
+#              spiffs so an over-the-air upload can target it (Update U_SPIFFS).
+#   nvs        settings
+# tools/pio_generate.py reads the airports offset from here.
+# Name,   Type, SubType, Offset,   Size,     Flags
+nvs,      data, nvs,     0x9000,   0x5000,
+otadata,  data, ota,     0xe000,   0x2000,
+app0,     app,  ota_0,   0x10000,  0x2A0000,
+app1,     app,  ota_1,   0x2B0000, 0x2A0000,
+airports, data, spiffs,  0x550000, 0x290000,
+coredump, data, coredump,0x7E0000, 0x10000,
