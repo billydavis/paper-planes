@@ -7,6 +7,7 @@
 #include <WiFi.h>
 
 #include "app/log.h"
+#include "app/mutes.h"
 #include "app/settings_store.h"
 #include "flights/airport_data.h"
 #include "generated/version_gen.h"
@@ -31,6 +32,8 @@ struct Locked {
   Locked() { xSemaphoreTake(lock, portMAX_DELAY); }
   ~Locked() { xSemaphoreGive(lock); }
 };
+
+static void mutesToJson(JsonDocument &doc);
 
 static void sendJson(int code, JsonDocument &doc) {
   String body;
@@ -107,7 +110,49 @@ static void handleState() {
     formatTime(s.nightEnd, b, sizeof(b));
     dev["night"] = String(a) + "-" + b;
   }
+  mutesToJson(doc);
   sendJson(200, doc);
+}
+
+// ---- mutes: aircraft kept off the screen (app/mutes.h) --------------------------------
+static void mutesToJson(JsonDocument &doc) {
+  MuteList list = mutesSnapshot();
+  JsonArray arr = doc["mutes"].to<JsonArray>();
+  for (int i = 0; i < MuteList::MAX; i++) {
+    const MuteList::Entry &e = list.at(i);
+    if (!e.hex[0]) continue;
+    JsonObject o = arr.add<JsonObject>();
+    o["hex"] = (const char *)e.hex;   // char arrays are stored by pointer; copy them
+    o["label"] = (const char *)e.label;
+    if (e.until) o["until"] = e.until; else o["until"] = nullptr;   // null = until unmuted
+  }
+  doc["clock_set"] = mutesNow() != 0;
+}
+
+static void handleMutes() {
+  JsonDocument doc;
+  mutesToJson(doc);
+  sendJson(200, doc);
+}
+
+// POST hex=a1b2c3&hours=3[&label=N123AB]. hours=0 (or missing) = until unmuted.
+static void handleMute() {
+  if (!authorizedPost()) return;
+  int hours = server.hasArg("hours") ? server.arg("hours").toInt() : 0;
+  if (hours < 0 || hours > 24 * 365) { server.send(400, "text/plain", "hours must be 0 to 8760"); return; }
+  switch (muteAdd(server.arg("hex").c_str(), hours, server.arg("label").c_str())) {
+    case MuteResult::BadHex: server.send(400, "text/plain", "hex missing or invalid"); return;
+    case MuteResult::NoClock: server.send(503, "text/plain", "clock not set yet; try again in a minute"); return;
+    case MuteResult::Ok: break;
+  }
+  handleMutes();
+}
+
+// POST hex=a1b2c3
+static void handleUnmute() {
+  if (!authorizedPost()) return;
+  if (!muteRemove(server.arg("hex").c_str())) { server.send(404, "text/plain", "not muted"); return; }
+  handleMutes();
 }
 
 // ---- settings -----------------------------------------------------------------------
@@ -248,6 +293,9 @@ void webBegin(const Settings &s, bool setupMode, const Display &display) {
   server.on("/api/nearest", HTTP_GET, guarded(handleNearest));
   server.on("/api/settings", HTTP_GET, guarded(handleSettingsGet));
   server.on("/api/networks", HTTP_GET, guarded(handleNetworks));
+  server.on("/api/mutes", HTTP_GET, guarded(handleMutes));
+  server.on("/api/mute", HTTP_POST, guarded(handleMute));
+  server.on("/api/unmute", HTTP_POST, guarded(handleUnmute));
   server.onNotFound([] {
     if (setup_) {   // captive portal: phones pop the settings page up on joining
       server.sendHeader("Location", "http://" + WiFi.softAPIP().toString() + "/settings");

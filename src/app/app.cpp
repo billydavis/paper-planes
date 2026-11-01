@@ -6,6 +6,7 @@
 #include "app/constants.h"
 #include "app/demo.h"
 #include "app/log.h"
+#include "app/mutes.h"
 #include "app/network.h"
 #include "app/settings_store.h"
 #include "flights/airport_data.h"
@@ -201,6 +202,7 @@ void appBegin() {
   loadSettings(cfg);
   LOGI("boot", "paper-planes %s, %s", FW_VERSION, cfg.demo ? "demo mode" : cfg.wifiSsid);
   LOGI("boot", "PSRAM %u KB, free heap %u KB", ESP.getPsramSize() / 1024, ESP.getFreeHeap() / 1024);
+  mutesBegin();
   display.begin();
   airportDataBegin();
   networkBegin(cfg);
@@ -230,6 +232,7 @@ void appTick() {
     applySettings(changed);
     force = true;
   }
+  if (mutesChanged() && !cfg.demo) lastPoll = millis() - cfg.pollS * 1000UL;   // look again right away
 
   Mode m = currentMode();
   switch (m) {

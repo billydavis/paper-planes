@@ -10,6 +10,7 @@
 
 #include "airlines.h"
 #include "geo.h"
+#include "mute.h"
 #include "text.h"
 
 static bool isNum(JsonVariantConst v) { return v.is<float>() || v.is<int>(); }
@@ -34,11 +35,8 @@ static void readLive(JsonObjectConst a, Live &l) {
   // characters they can legitimately have: a crafted callsign like
   // "X/../alerts?" must not steer those requests. ("~" marks a non-ICAO
   // address in readsb.)
+  normalizeHex(a["hex"] | "", l.hex);
   int n = 0;
-  for (const char *p = a["hex"] | ""; *p && n < 7; p++)
-    if (isxdigit((unsigned char)*p) || (*p == '~' && n == 0)) l.hex[n++] = tolower(*p);
-  l.hex[n] = 0;
-  n = 0;
   for (const char *p = a["flight"] | ""; *p && n < 8; p++)
     if (isalnum((unsigned char)*p)) l.cs[n++] = toupper(*p);
   l.cs[n] = 0;
@@ -60,7 +58,8 @@ static void readLive(JsonObjectConst a, Live &l) {
                 strcmp(em, "none") != 0;
 }
 
-Pick pick(JsonVariantConst feed, double lat, double lon, const char *sticky) {
+Pick pick(JsonVariantConst feed, double lat, double lon, const char *sticky, const MuteList *mutes,
+          uint32_t now) {
   JsonArrayConst list = feed["ac"].is<JsonArrayConst>() ? feed["ac"].as<JsonArrayConst>()
                                                          : feed["aircraft"].as<JsonArrayConst>();
   Pick p;
@@ -70,7 +69,8 @@ Pick pick(JsonVariantConst feed, double lat, double lon, const char *sticky) {
     if (!isNum(a["lat"]) || !isNum(a["lon"])) continue;
     if (a["alt_baro"].is<const char *>() && !strcmp(a["alt_baro"], "ground")) continue;
     double d = gcNm(lat, lon, a["lat"], a["lon"]);
-    p.count++;
+    p.count++;   // muted aircraft are still in range
+    if (mutes && mutes->muted(a["hex"] | "", now)) { p.muted++; continue; }
     if (d < bestD) { bestD = d; best = a; }
     if (sticky && sticky[0] && !strcasecmp(a["hex"] | "", sticky)) { cur = a; curD = d; }
   }

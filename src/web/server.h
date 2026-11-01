@@ -11,6 +11,9 @@
 //                  /api/epaper/nearest)
 //   /api/state     that plus device status, for the landing page
 //   /api/settings  the settings (password needed when one is set)
+//   /api/mutes     muted aircraft (also in /api/state); POST /api/mute
+//                  (hex, hours: 0 = until unmuted, label) and /api/unmute (hex)
+//                  change them, with the same checks as the settings form
 //   /screen.bmp    the panel's current frame
 // Runs in its own task, so it answers while the board is busy fetching or
 // refreshing the panel. Request checks: web/guard.h.

@@ -12,6 +12,7 @@
 #include "airports.h"
 #include "flight.h"
 #include "geo.h"
+#include "mute.h"
 #include "route.h"
 #include "text.h"
 
@@ -121,6 +122,33 @@ void test_flight_json_round_trip() {
   TEST_ASSERT_EQUAL(NO_VALUE, back.trackDeg);
 }
 
+// ArduinoJson 7.3+ stores char arrays by pointer; the JSON must not change
+// (or turn to garbage) when the Flight it came from is overwritten.
+void test_flight_json_owns_its_strings() {
+  Flight f;
+  f.ok = true;
+  scopy(f.hex, "a1b2c3");
+  f.hasAirline = true;
+  scopy(f.airlineIcao, "AAL");
+  scopy(f.airlineName, "American");
+  scopy(f.shape, "narrowbody");
+  f.hasRoute = f.hasTo = true;
+  scopy(f.from.code, "ATL");
+  scopy(f.from.city, "Atlanta");
+  scopy(f.to.code, "DFW");
+  scopy(f.to.city, "Dallas");
+  scopy(f.basis, "track");
+  scopy(f.vtrend, "up");
+  JsonDocument doc;
+  flightToJson(f, doc);
+  memset((void *)&f, 'x', sizeof(f));
+  std::string out;
+  serializeJson(doc, out);
+  TEST_ASSERT_EQUAL_STRING_MESSAGE(std::string::npos == out.find("xxx") ? "clean" : out.c_str(), "clean", "points into Flight");
+  TEST_ASSERT_EQUAL_STRING("a1b2c3", doc["hex"]);
+  TEST_ASSERT_EQUAL_STRING("Dallas", doc["route"]["to"]["city"]);
+}
+
 // ---- route rules -------------------------------------------------------------------------
 static Live liveAt(double lat, double lon, double alt, double vrate, const char *cs, const char *cat = "A3") {
   Live l;
@@ -160,6 +188,64 @@ void test_hex_and_callsign_are_sanitized_for_urls() {
   TEST_ASSERT_EQUAL_STRING("XALERTS", p.ac.cs);
 }
 
+// ---- mutes ------------------------------------------------------------------------
+void test_mute_list_expiry_and_labels() {
+  MuteList m;
+  TEST_ASSERT_FALSE(m.add("zz/..", 0, 1000));   // nothing hex-like left
+  TEST_ASSERT_TRUE(m.add("A1B2C3", 1000 + 3 * 3600, 1000, "n12-3ab!"));
+  TEST_ASSERT_TRUE(m.add("~abc", 0, 1000));      // permanent
+  TEST_ASSERT_TRUE(m.muted("a1b2c3", 2000));
+  TEST_ASSERT_TRUE(m.muted("a1b2c3", 0));        // clock not set: still muted
+  TEST_ASSERT_FALSE(m.muted("a1b2c3", 1000 + 3 * 3600));
+  TEST_ASSERT_TRUE(m.muted("~ABC", 4000000000u));
+  TEST_ASSERT_EQUAL_STRING("N12-3AB", m.at(0).label);
+  m.add("a1b2c3", 0, 2000);                      // re-timed, label kept
+  TEST_ASSERT_EQUAL(2, m.count());
+  TEST_ASSERT_EQUAL_STRING("N12-3AB", m.at(0).label);
+  TEST_ASSERT_TRUE(m.remove("A1B2C3"));
+  TEST_ASSERT_FALSE(m.remove("a1b2c3"));
+  TEST_ASSERT_EQUAL(1, m.count());
+}
+
+void test_mute_list_prunes_and_makes_room() {
+  MuteList m;
+  for (int i = 0; i < MuteList::MAX; i++) {
+    char hex[8];
+    snprintf(hex, sizeof(hex), "%06x", i + 1);
+    m.add(hex, i == 5 ? 1500 : 5000 + i, 1000);
+  }
+  TEST_ASSERT_EQUAL(MuteList::MAX, m.count());
+  m.add("abcdef", 0, 1000);                      // full: the one ending soonest goes
+  TEST_ASSERT_EQUAL(MuteList::MAX, m.count());
+  TEST_ASSERT_FALSE(m.muted("000006", 1000));
+  TEST_ASSERT_TRUE(m.muted("abcdef", 1000));
+  TEST_ASSERT_TRUE(m.prune(5002));               // 000001..000003 have ended
+  TEST_ASSERT_EQUAL(MuteList::MAX - 3, m.count());
+  TEST_ASSERT_FALSE(m.prune(5002));
+}
+
+void test_pick_skips_muted_even_when_sticky() {
+  JsonDocument feed;
+  deserializeJson(feed, R"({"ac":[
+    {"hex":"aaaaaa","lat":1.0,"lon":1.0,"alt_baro":1500},
+    {"hex":"bbbbbb","lat":1.0,"lon":1.05,"alt_baro":3000},
+    {"hex":"cccccc","lat":1.0,"lon":1.2,"alt_baro":9000}]})");
+  JsonVariantConst f = feed.as<JsonVariantConst>();
+  MuteList m;
+  m.add("AAAAAA", 9000, 1000);
+  Pick p = pick(f, 1, 1, "aaaaaa", &m, 2000);
+  TEST_ASSERT_TRUE(p.found);
+  TEST_ASSERT_EQUAL_STRING("bbbbbb", p.ac.hex);
+  TEST_ASSERT_EQUAL(3, p.count);                 // still in range
+  TEST_ASSERT_EQUAL(1, p.muted);
+  TEST_ASSERT_EQUAL_STRING("aaaaaa", pick(f, 1, 1, nullptr, &m, 9000).ac.hex);   // mute over
+  m.add("bbbbbb", 0, 2000);
+  m.add("cccccc", 0, 2000);
+  p = pick(f, 1, 1, nullptr, &m, 2000);
+  TEST_ASSERT_FALSE(p.found);                    // everything muted: quiet skies
+  TEST_ASSERT_EQUAL(3, p.count);
+}
+
 int main() {
   fs::path root = fs::path(__FILE__).parent_path().parent_path().parent_path();
   std::ifstream f(root / "src" / "generated" / "airports.bin", std::ios::binary);
@@ -176,7 +262,11 @@ int main() {
   RUN_TEST(test_nearest_airport_kinds_and_cone);
   RUN_TEST(test_corrupt_image_is_rejected);
   RUN_TEST(test_flight_json_round_trip);
+  RUN_TEST(test_flight_json_owns_its_strings);
   RUN_TEST(test_departure_memory_follows_callsign_and_expires);
   RUN_TEST(test_hex_and_callsign_are_sanitized_for_urls);
+  RUN_TEST(test_mute_list_expiry_and_labels);
+  RUN_TEST(test_mute_list_prunes_and_makes_room);
+  RUN_TEST(test_pick_skips_muted_even_when_sticky);
   return UNITY_END();
 }

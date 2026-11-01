@@ -5,6 +5,7 @@
 
 #include "app/constants.h"
 #include "app/log.h"
+#include "app/mutes.h"
 #include "net/https.h"
 #include "route.h"
 #include "text.h"
@@ -87,7 +88,8 @@ bool trackNearest(const Settings &s, const char *sticky, Flight &out) {
   double radius = constrain(s.radiusNm, 1, 100);
   JsonDocument doc;
   if (!nearby(s, doc)) return false;
-  Pick p = pick(doc.as<JsonVariantConst>(), s.lat, s.lon, sticky);
+  MuteList mutes = mutesSnapshot();
+  Pick p = pick(doc.as<JsonVariantConst>(), s.lat, s.lon, sticky, &mutes, mutesNow());
   doc.clear();
 
   static const AcInfo noInfo;
