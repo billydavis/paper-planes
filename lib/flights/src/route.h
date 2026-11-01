@@ -29,12 +29,17 @@ struct Live {
 void feedFilter(JsonDocument &filter);
 
 // The nearest airborne aircraft (epaper.py pick). `sticky`: hex on screen now.
+// Aircraft on `mutes` (at Unix time `now`, see mute.h) are never picked, not
+// even when sticky, but still count as in range.
+class MuteList;
 struct Pick {
   bool found = false;
   Live ac{};
   int count = 0;   // airborne aircraft with a position (in_range)
+  int muted = 0;   // of those, skipped because they're muted
 };
-Pick pick(JsonVariantConst feed, double lat, double lon, const char *sticky);
+Pick pick(JsonVariantConst feed, double lat, double lon, const char *sticky, const MuteList *mutes = nullptr,
+          uint32_t now = 0);
 
 // Airframe details (sources.py enrich_aircraft): hexdb first, then adsbdb.
 struct AcInfo {

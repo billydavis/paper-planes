@@ -12,7 +12,19 @@
   <h1>Paper Planes</h1><span id=pill class=pill>connecting</span>
   <nav><a href=/settings>Settings</a><a href=/api/nearest>JSON</a></nav>
 </header>
-<div class="card screen"><img id=screen src=/screen.bmp alt="What the e-paper screen shows now"></div>
+<div class=panel>
+  <div class=screen><img id=screen src=/screen.bmp alt="What the e-paper screen shows now"></div>
+  <section class=hide id=hide hidden aria-label="Hide planes from the screen">
+    <div class=hide-row id=hideRow>
+      <span class=hide-what id=hideWhat>Hide <b id=hideName></b> for</span>
+      <div class=seg id=seg role=group aria-labelledby=hideWhat>
+        <button type=button data-h=1>1 h</button><button type=button data-h=3>3 h</button><button type=button data-h=8>8 h</button><button type=button data-h=24>1 day</button><button type=button data-h=0 title="Until you show it again">Forever</button>
+      </div>
+    </div>
+    <p class=hide-msg id=hideMsg role=status aria-live=polite></p>
+    <div class=hidden-list id=muted></div>
+  </section>
+</div>
 <div class=card id=flight><h2>On screen</h2><p class=mute>Waiting for the first update...</p></div>
 <div class=card><h2>Device</h2><dl id=device></dl></div>
 <p class="mute hint">Updates every few seconds. <a href=/update>Firmware and data updates</a></p>
@@ -61,8 +73,79 @@ function flightHtml(st) {
     + item('Updated', ago(f.updated)) + '</dl>';
 }
 
+function left(until) {
+  if (until == null) return 'forever';
+  const m = Math.max(1, Math.round((until - Date.now() / 1000) / 60));
+  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ' ' + (m % 60) + ' min' : ''}`;
+}
+const forText = h => h == 0 ? 'until you show it again' : h == 24 ? 'for a day' : `for ${h} hour${h == 1 ? '' : 's'}`;
+
+let onScreen = null;   // {hex, label} of the plane shown now
+let chipsHtml = '';    // redrawn only when it changes, so keyboard focus stays put
+let msgTimer = 0;
+function say(html, warn) {
+  const m = $('#hideMsg');
+  m.innerHTML = html;
+  m.classList.toggle('warn', !!warn);
+  clearTimeout(msgTimer);
+  if (html) msgTimer = setTimeout(() => { say(''); $('#hide').hidden = !onScreen && !chipsHtml; }, 12000);
+}
+
+function drawMutes(st) {
+  const f = st.flight;
+  onScreen = f && f.status === 'ok' && f.hex ? {hex: f.hex, label: f.reg || f.flight || ''} : null;
+  const list = st.mutes || [];
+  $('#hideRow').hidden = !onScreen;
+  if (onScreen) $('#hideName').textContent = onScreen.label || onScreen.hex;
+  // Timed choices need the board's clock; "Forever" doesn't.
+  for (const b of document.querySelectorAll('#seg [data-h]:not([data-h="0"])')) {
+    b.disabled = st.clock_set === false;
+    b.title = b.disabled ? "Waiting for the board's clock" : '';
+  }
+  const html = list.length ? '<span class=hidden-label id=hiddenLabel>Hidden</span><ul class=chips aria-labelledby=hiddenLabel>' + list.map(m => {
+    const name = esc(m.label || m.hex);
+    return `<li class=chip title="ICAO ${esc(m.hex)}"><b>${name}</b><span>${esc(left(m.until))}</span>`
+      + `<button type=button data-unmute="${esc(m.hex)}" aria-label="Show ${name} again">&times;</button></li>`;
+  }).join('') + '</ul>' : '';
+  if (html !== chipsHtml) { chipsHtml = html; $('#muted').innerHTML = html; }
+  $('#hide').hidden = !onScreen && !list.length && !$('#hideMsg').innerHTML;
+}
+
+const WHY = {
+  401: 'That needs the settings password.',
+  403: 'Refused: open this page from the board itself.',
+};
+async function post(url, body) {
+  const r = await fetch(url, {method: 'POST', body: new URLSearchParams(body)});
+  if (!r.ok) throw new Error(WHY[r.status] || (await r.text()) || r.statusText);
+  return r.json();
+}
+
+$('#seg').addEventListener('click', async e => {
+  const b = e.target.closest('[data-h]');
+  if (!b || b.disabled || !onScreen) return;
+  const p = onScreen, name = esc(p.label || p.hex), h = b.dataset.h, seg = $('#seg');
+  seg.setAttribute('aria-busy', 'true');
+  b.classList.add('busy');
+  try {
+    await post('/api/mute', {...p, hours: h});
+    say(`Hid <b>${name}</b> ${forText(h)}. Finding the next plane&hellip; <button type=button class=link data-unmute="${esc(p.hex)}">Undo</button>`);
+    await refresh();
+  } catch (err) { say(esc(err.message), true); }
+  seg.removeAttribute('aria-busy');
+  b.classList.remove('busy');
+});
+$('#hide').addEventListener('click', async e => {
+  const b = e.target.closest('[data-unmute]');
+  if (!b) return;
+  b.disabled = true;
+  try { await post('/api/unmute', {hex: b.dataset.unmute}); say(''); await refresh(); }
+  catch (err) { b.disabled = false; say(esc(err.message), true); }
+});
+
 let frame = -1;
 function draw(st) {
+  drawMutes(st);
   const d = st.device;
   const pill = $('#pill');
   pill.textContent = st.status;
@@ -78,9 +161,12 @@ function draw(st) {
     + item('Free memory', Math.round(d.heap / 1024) + ' KB' + (d.psram ? `, PSRAM ${Math.round(d.psram / 1024)} KB` : ''));
 }
 
-async function tick() {
+async function refresh() {
   try { draw(await (await fetch('/api/state', {cache: 'no-store'})).json()); }
   catch (e) { $('#pill').textContent = 'not responding'; $('#pill').className = 'pill bad'; }
+}
+async function tick() {
+  await refresh();
   setTimeout(tick, 4000);
 }
 tick();

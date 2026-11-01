@@ -92,8 +92,28 @@ The board serves `http://flights.local` (mDNS; the name is a setting):
 | `/api/state`      | the flight plus device status                                  |
 | `/api/settings`   | the settings (no secrets)                                      |
 | `/api/networks`   | Wi-Fi networks in range, for the settings page                 |
+| `/api/mutes`      | muted aircraft (also in `/api/state`)                          |
+| `/api/mute`       | POST `hex`, `hours` (0 = until unmuted), optional `label`: hide an aircraft |
+| `/api/unmute`     | POST `hex`: show it again                                      |
 
 The pages are ordinary files in `web/`; the build gzips them into the firmware.
+
+### Muting aircraft
+
+Near a flight school the closest plane is often a trainer doing laps of the
+field. The strip under the panel picture on `/` hides that airframe (by
+ICAO hex) for 1 h, 3 h, 8 h, a day, or forever in one tap, with Undo; the
+board then shows the next-nearest plane right away. Hidden planes are kept in
+flash (up to 16; when full, the one ending soonest makes room) and listed as
+chips with an × to show them again. Muted planes still count toward "in range".
+
+The POSTs use the same checks as the settings form: the request must come from
+the board's own page (`Origin` or `Referer`), plus the settings password if
+one is set. From a script:
+
+```bash
+curl -u admin:PASSWORD -H "Origin: http://flights.local" -d hex=a1b2c3 -d hours=3 http://flights.local/api/mute
+```
 
 ### Night hours
 
