@@ -129,7 +129,7 @@ $('#seg').addEventListener('click', async e => {
   b.classList.add('busy');
   try {
     await post('/api/mute', {...p, hours: h});
-    say(`Hid <b>${name}</b> ${forText(h)}. Finding the next plane&hellip; <button type=button class=link data-unmute="${esc(p.hex)}">Undo</button>`);
+    say(`<b>${name}</b> is hidden ${forText(h)}. Finding the next plane&hellip; <button type=button class=link data-unmute="${esc(p.hex)}">Undo</button>`);
     await refresh();
   } catch (err) { say(esc(err.message), true); }
   seg.removeAttribute('aria-busy');
