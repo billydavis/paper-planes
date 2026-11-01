@@ -115,11 +115,21 @@ const WHY = {
   401: 'That needs the settings password.',
   403: 'Refused: open this page from the board itself.',
 };
-async function post(url, body) {
-  const r = await fetch(url, {method: 'POST', body: new URLSearchParams(body)});
-  if (!r.ok) throw new Error(WHY[r.status] || (await r.text()) || r.statusText);
-  return r.json();
+// Every request gets a deadline. Without one, a request the board never
+// answers (it restarted mid-request, say) hangs for minutes and the page
+// stops updating. The deadline covers reading the body too.
+async function request(url, opt, ms) {
+  const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
+  try {
+    const r = await fetch(url, {...opt, signal: c.signal});
+    if (!r.ok) throw new Error(WHY[r.status] || (await r.text()) || r.statusText);
+    return await r.json();
+  } catch (e) {
+    throw e.name === 'AbortError' ? new Error('The board did not answer. Try again.') : e;
+  } finally { clearTimeout(t); }
 }
+// Long deadline: the browser may be showing the password prompt meanwhile.
+const post = (url, body) => request(url, {method: 'POST', body: new URLSearchParams(body)}, 60000);
 
 $('#seg').addEventListener('click', async e => {
   const b = e.target.closest('[data-h]');
@@ -162,13 +172,20 @@ function draw(st) {
 }
 
 async function refresh() {
-  try { draw(await (await fetch('/api/state', {cache: 'no-store'})).json()); }
+  try { draw(await request('/api/state', {cache: 'no-store'}, 8000)); }
   catch (e) { $('#pill').textContent = 'not responding'; $('#pill').className = 'pill bad'; }
 }
+let timer = 0, ticking = false;
 async function tick() {
+  if (ticking) return;
+  ticking = true;
+  clearTimeout(timer);
   await refresh();
-  setTimeout(tick, 4000);
+  ticking = false;
+  timer = setTimeout(tick, 4000);
 }
+// Back on the page (phone unlocked, tab switched back): update now, not in 4 s.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 tick();
 </script>
 </body>
